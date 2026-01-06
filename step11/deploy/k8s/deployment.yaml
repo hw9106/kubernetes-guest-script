@@ -30,13 +30,13 @@ spec:
         kubernetes.io/hostname: k8s-master
       containers:
         - name: guest-container
-          image: academyitwill/guest:latest
-          #imagePullPolicy: Always
+          image: academyitwill/guest
+          imagePullPolicy: Always
           env:
-          - name: USER_PROFILE
-            value: remote-oracle 
+          - name: SPRING_PROFILES_ACTIVE
+            value: mysql-prod-group
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           envFrom:
             - configMapRef:
