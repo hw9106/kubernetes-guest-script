@@ -54,8 +54,6 @@ pipeline {
         stage('K8S Deploy') {
             steps {
                 // 쿠버네티스 배포 
-                sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/namespace.yaml"
-                sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/configmap.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/secret.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/deployment.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/service.yaml"
