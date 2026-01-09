@@ -1,11 +1,16 @@
 pipeline {
     agent any
-    
+
+    parameters {
+        // GitHub  사용자명 입력
+        string(name: 'GITHUB_USERNAME',  defaultValue: '2025-07-JAVA-DEVELOPER-162', description: 'GitHub  사용자명을 입력하세요.')
+    }	
     environment {
-         // 본인의 username으로 하실 분은 수정해주세요.
-        GITHUB_URL = 'https://github.com/2024-07-JAVA-DEVELOPER-155/kubernetes-guest-script.git'
-        // 실습 넘버링
-         STEP_NUM = 'step24'
+          
+        GITHUB_SCRIPT_URL = "https://github.com/${GITHUB_USERNAME}/kubernetes-guest-script.git"
+         //deployment.yaml -> image: academyitwill/guest:v1
+         //실습 step 번호 - (수정x)
+        STEP_NUM = 'step24'
     }
 
     stages {
@@ -21,8 +26,6 @@ pipeline {
        stage('쿠버네티스 Blue배포') {
             steps {
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/namespace.yaml"
-                sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/configmap.yaml"
-                sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/secret.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/service.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/deployment.yaml"
             }
