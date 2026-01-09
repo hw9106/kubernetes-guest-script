@@ -64,7 +64,7 @@ pipeline {
         stage('Blue 삭제') {
             steps {
                 sh "kubectl delete -f ./${STEP_NUM}/deploy/k8s/blue/deployment.yaml"
-                sh "kubectl patch -n guest-namespace-step2 svc guest-service -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
+                sh "kubectl patch -n guest-namespace-step24 svc guest-service -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
             }
         }
     }
