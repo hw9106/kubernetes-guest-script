@@ -19,7 +19,7 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']],
                         extensions: [[$class: 'SparseCheckoutPaths',
                                       sparseCheckoutPaths: [[path: "/${STEP_NUM}"]]]],
-                        userRemoteConfigs: [[url: "${GITHUB_URL}"]])
+                        userRemoteConfigs: [[url: "${GITHUB_SCRIPT_URL}"]])
             }
         }
 
@@ -47,7 +47,7 @@ pipeline {
                 script {
                     def returnValue
                     while (returnValue != "true true"){
-                        returnValue = sh(returnStdout: true, encoding: 'UTF-8', script: "kubectl get -n guest-namespace-step2 pods -l name='guest',blue-green-no='2' -o jsonpath='{.items[*].status.containerStatuses[*].ready}'")
+                        returnValue = sh(returnStdout: true, encoding: 'UTF-8', script: "kubectl get -n guest-namespace-step24 pods -l name='guest',blue-green-no='2' -o jsonpath='{.items[*].status.containerStatuses[*].ready}'")
                         echo "${returnValue}"
                         sleep 5
                     }
@@ -57,7 +57,7 @@ pipeline {
 
         stage('Green 전환 완료') {
             steps {
-                sh "kubectl patch -n guest-namespace-step2 svc  guest-service -p '{\"spec\": {\"selector\": {\"blue-green-no\": \"2\"}}}'"
+                sh "kubectl patch -n guest-namespace-step24 svc  guest-service -p '{\"spec\": {\"selector\": {\"blue-green-no\": \"2\"}}}'"
             }
         }
 
@@ -65,8 +65,6 @@ pipeline {
             steps {
                 sh "kubectl delete -f ./${STEP_NUM}/deploy/k8s/blue/deployment.yaml"
                 sh "kubectl patch -n guest-namespace-step2 svc guest-service -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
-                sh "kubectl patch -n guest-namespace-step2 cm guest-configmap -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
-                sh "kubectl patch -n guest-namespace-step2 secret guest-secret -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
             }
         }
     }
