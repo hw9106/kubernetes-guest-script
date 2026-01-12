@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: guest-namespace-step2
+  namespace: guest-namespace-step22
   name: guest-deployment
   labels:
     part-of: guest-part
@@ -34,7 +34,7 @@ spec:
           imagePullPolicy: Always
           env:
           - name: SPRING_PROFILES_ACTIVE
-            value: mysql-dev-group
+            value: mysql-prod-group
           ports:
             - containerPort: 8080
               name: http

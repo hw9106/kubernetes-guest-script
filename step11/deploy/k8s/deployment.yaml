@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: guest-namespace-step1
+  namespace: guest-namespace-step11
   name: guest-deployment
   labels:
     part-of: guest-part

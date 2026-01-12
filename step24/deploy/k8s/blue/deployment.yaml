@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: guest-namespace-step2
+  namespace: guest-namespace-step24
   name: guest-deployment-1
   labels:
     part-of: guest-part
@@ -35,26 +35,9 @@ spec:
           imagePullPolicy: Always
           env:
           - name: SPRING_PROFILES_ACTIVE
-            value: mysql-dev-group
+            value: mysql-prod-group
           ports:
             - containerPort: 8080
               name: http
-          envFrom:
-            - configMapRef:
-                name: guest-configmap
-          # resources:
-          #   requests:
-          #     memory: "500Mi"
-          #     cpu: "100m"
-          #   limits:
-          #     memory: "1000Mi"
-          #     cpu: "200m"
-          volumeMounts:
-            - name: secret-datasource
-              mountPath: /usr/src/myapp/datasource
-      volumes:
-        - name: secret-datasource
-          secret:
-            secretName: guest-secret
-          
+ 
           

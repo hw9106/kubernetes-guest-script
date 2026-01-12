@@ -1,15 +1,14 @@
 pipeline {
     agent any
+    
     parameters {
-        // DockerHub 사용자명 입력
-        string(name: 'DOCKERHUB_USERNAME',  defaultValue: 'academyitwill', description: 'DockerHub 사용자명을 입력하세요.')
         // GitHub  사용자명 입력
-        string(name: 'GITHUB_USERNAME',  defaultValue: '2025-01-JAVA-DEVELOPER-159', description: 'GitHub  사용자명을 입력하세요.')
+        string(name: 'GITHUB_USERNAME',  defaultValue: '2025-07-JAVA-DEVELOPER-162', description: 'GitHub  사용자명을 입력하세요.')
     }			
     environment {
-        // 본인의 username으로 하실 분은 수정해주세요.
-        GITHUB_URL = 'https://github.com/2025-01-JAVA-DEVELOPER-159/kubernetes-guest-script.git'
-        // 실습 넘버링
+        GITHUB_SCRIPT_URL = "https://github.com/${GITHUB_USERNAME}/kubernetes-guest-script.git"
+        //deployment.yaml -> image: academyitwill/guest:v1
+         //실습 step 번호 - (수정x)
          STEP_NUM = 'step23'
     }
 
@@ -19,15 +18,13 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']],
                         extensions: [[$class: 'SparseCheckoutPaths',
                                       sparseCheckoutPaths: [[path: "/${STEP_NUM}"]]]],
-                        userRemoteConfigs: [[url: "${GITHUB_URL}"]])
+                        userRemoteConfigs: [[url: "${GITHUB_SCRIPT_URL}"]])
             }
         }
 
         stage('쿠버네티스 Blue배포') {
             steps {
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/namespace.yaml"
-                sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/configmap.yaml"
-                sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/secret.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/service.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/blue/deployment.yaml"
             }
@@ -41,7 +38,7 @@ pipeline {
 
         stage('쿠버네티스 Green배포') {
             steps {
-	        sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/green/deployment.yaml"
+	            sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/green/deployment.yaml"
                 sh "kubectl apply -f ./${STEP_NUM}/deploy/k8s/green/service.yaml"
             }
         }
@@ -49,9 +46,9 @@ pipeline {
         stage('전환여부 확인') {
             steps {
                 script {
-                    returnValue = input message: 'Green 전환?', ok: "Yes", parameters: [booleanParam(defaultValue: true, name: 'IS_SWITCHED')]
+                    def returnValue = input message: 'Green 전환?', ok: "Yes", parameters: [booleanParam(defaultValue: true, name: 'IS_SWITCHED')]
                     if (returnValue) {
-                        sh "kubectl patch -n guest-namespace-step2 svc guest-service -p '{\"spec\": {\"selector\": {\"blue-green-no\": \"2\"}}}'"
+                        sh "kubectl patch -n guest-namespace-step23 svc guest-service -p '{\"spec\": {\"selector\": {\"blue-green-no\": \"2\"}}}'"
                     }
                 }
             }
@@ -60,16 +57,16 @@ pipeline {
         stage('롤백 확인') {
             steps {
                 script {
-                    returnValue = input message: 'Blue 롤백?', parameters: [choice(choices: ['done', 'rollback'], name: 'IS_ROLLBACk')]
+                    def returnValue = input message: 'Blue 롤백?', parameters: [choice(choices: ['done', 'rollback'], name: 'IS_ROLLBACk')]
                     if (returnValue == "done") {
                         sh "kubectl delete -f ./${STEP_NUM}/deploy/k8s/blue/deployment.yaml"
                         sh "kubectl delete -f ./${STEP_NUM}/deploy/k8s/green/service.yaml"
-                        sh "kubectl patch -n guest-namespace-step2 svc guest-service -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
-                        sh "kubectl patch -n guest-namespace-step2 cm guest-configmap -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
-                        sh "kubectl patch -n guest-namespace-step2 secret guest-secret -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
+                        sh "kubectl patch -n guest-namespace-step23 svc guest-service -p '{\"metadata\": {\"labels\": {\"version\": \"2.0.0\"}}}'"
                     }
                     if (returnValue == "rollback") {
-                        sh "kubectl patch -n guest-namespace-step2 svc guest-service -p '{\"spec\": {\"selector\": {\"blue-green-no\": \"1\"}}}'"
+                        sh "kubectl patch -n guest-namespace-step23 svc guest-service -p '{\"spec\": {\"selector\": {\"blue-green-no\": \"1\"}}}'"
+                        sh "kubectl delete -f ./${STEP_NUM}/deploy/k8s/green/deployment.yaml"
+                        sh "kubectl delete -f ./${STEP_NUM}/deploy/k8s/green/service.yaml"
                     }
                 }
             }
